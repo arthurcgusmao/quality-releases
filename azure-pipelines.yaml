@@ -138,40 +138,42 @@ stages:
               script: |
                 unzip -o $(Pipeline.Workspace)/drop-selenium/$(ls $(Pipeline.Workspace)/drop-selenium/ | tail -n1) -d /home/adminuser
 
-          - bash: |
-              export SELENIUM_HEADLESS=TRUE
-              python3 /home/adminuser/login.py > /home/adminuser/selenium-results.txt
-            displayName: 'Run UI tests'
+          # - bash: |
+          #     export SELENIUM_HEADLESS=TRUE
+          #     python3 /home/adminuser/login.py > /home/adminuser/selenium-results.txt
+          #   displayName: 'Run UI tests'
 
 
-- stage: IntegrationTests
-  jobs:
-  - job: IntegrationTests
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - bash: |
-        make newman
-      displayName: 'Run Postman tests'
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit' # Options: JUnit, NUnit, VSTest, xUnit, cTest
-        testResultsFiles: 'results/newman-output.xml'
-
-
-
-# - stage: UITests
+# - stage: IntegrationTests
 #   jobs:
-#   - job: UITests
-#     environment:
-#       name: VM-UI-TESTS
-#       resourceType: VirtualMachine
+#   - job: IntegrationTests
+#     pool:
+#       vmImage: 'ubuntu-latest'
 #     steps:
 #     - bash: |
-#         export SELENIUM_HEADLESS=TRUE
-#         python3 /home/adminuser/login.py > /home/adminuser/selenium-results.txt
-#       displayName: 'Run UI tests'
-#     # - task: PublishTestResults@2
-#     #   inputs:
-#     #     testResultsFormat: 'JUnit' # Options: JUnit, NUnit, VSTest, xUnit, cTest
-#     #     testResultsFiles: 'results/newman-output.xml'
+#         make newman
+#       displayName: 'Run Postman tests'
+#     - task: PublishTestResults@2
+#       inputs:
+#         testResultsFormat: 'JUnit' # Options: JUnit, NUnit, VSTest, xUnit, cTest
+#         testResultsFiles: 'results/newman-output.xml'
+
+
+- stage: UITests
+  jobs:
+  - deployment: UITests
+    displayName: UITests
+    environment:
+      name: VM-UI-TESTS
+      resourceType: VirtualMachine
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                #! /bin/bash
+                export SELENIUM_HEADLESS=TRUE
+                python3 /home/adminuser/login.py > /home/adminuser/selenium-results.txt
