@@ -14,61 +14,61 @@ stages:
 
     # Download SSH key for VM infra deploy
 
-    # - task: InstallSSHKey@0
-    #   inputs:
-    #     knownHostsEntry: 'ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKKu3ifmhAlFWRewCWho8ZPyJJkKlRFI46gzGbqKPYiP7NdiBzm46AbDVIhUfCMn02DHhpMVPJ+ahVufBsbyQSk='
-    #     sshPublicKey: '$(VMSSHPublicKey)'
-    #     sshKeySecureFile: 'udacity_proj3_vm'
+    - task: InstallSSHKey@0
+      inputs:
+        knownHostsEntry: 'ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKKu3ifmhAlFWRewCWho8ZPyJJkKlRFI46gzGbqKPYiP7NdiBzm46AbDVIhUfCMn02DHhpMVPJ+ahVufBsbyQSk='
+        sshPublicKey: '$(VMSSHPublicKey)'
+        sshKeySecureFile: 'udacity_proj3_vm'
 
-    # # Deploy infra w/ Terraform
+    # Deploy infra w/ Terraform
 
-    # - task: DownloadSecureFile@1
-    #   name: tfvarsTask
-    #   displayName: 'Download .tfvars file'
-    #   inputs:
-    #     secureFile: 'terraform.tfvars'
-    # - bash: |
-    #     mv $(tfvarsTask.secureFilePath) ./terraform/terraform.tfvars
+    - task: DownloadSecureFile@1
+      name: tfvarsTask
+      displayName: 'Download .tfvars file'
+      inputs:
+        secureFile: 'terraform.tfvars'
+    - bash: |
+        mv $(tfvarsTask.secureFilePath) ./terraform/terraform.tfvars
 
-    # - bash: |
-    #     cd ./terraform
-    #     terraform init
-    #     terraform apply -auto-approve
-    #   displayName: Terraform Init and Apply
-    #   env:
-    #     ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-    #     ARM_CLIENT_ID:       $(ARM_CLIENT_ID)
-    #     ARM_CLIENT_SECRET:   $(ARM_CLIENT_SECRET)
-    #     ARM_TENANT_ID:       $(ARM_TENANT_ID)
-    #     ARM_ACCESS_KEY:      $(ARM_ACCESS_KEY) # Needed for state sync
-    #     TF_VAR_ssh_public_key_path: "/home/vsts/work/_temp/udacity_proj3_vm.pub"
+    - bash: |
+        cd ./terraform
+        terraform init
+        terraform apply -auto-approve
+      displayName: Terraform Init and Apply
+      env:
+        ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+        ARM_CLIENT_ID:       $(ARM_CLIENT_ID)
+        ARM_CLIENT_SECRET:   $(ARM_CLIENT_SECRET)
+        ARM_TENANT_ID:       $(ARM_TENANT_ID)
+        ARM_ACCESS_KEY:      $(ARM_ACCESS_KEY) # Needed for state sync
+        TF_VAR_ssh_public_key_path: "/home/vsts/work/_temp/udacity_proj3_vm.pub"
 
-    # - bash: |
-    #     cd ./terraform
-    #     terraform output -json | jq ".ip_address.value" | tee echo
-    #   name: VMIPAddress
-    #   env:
-    #     ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-    #     ARM_CLIENT_ID:       $(ARM_CLIENT_ID)
-    #     ARM_CLIENT_SECRET:   $(ARM_CLIENT_SECRET)
-    #     ARM_TENANT_ID:       $(ARM_TENANT_ID)
-    #     ARM_ACCESS_KEY:      $(ARM_ACCESS_KEY) # Needed for state sync
+    - bash: |
+        cd ./terraform
+        terraform output -json | jq ".ip_address.value" | tee echo
+      name: VMIPAddress
+      env:
+        ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+        ARM_CLIENT_ID:       $(ARM_CLIENT_ID)
+        ARM_CLIENT_SECRET:   $(ARM_CLIENT_SECRET)
+        ARM_TENANT_ID:       $(ARM_TENANT_ID)
+        ARM_ACCESS_KEY:      $(ARM_ACCESS_KEY) # Needed for state sync
 
-    # # FakeRestAPI build
+    # FakeRestAPI build
 
-    # - task: ArchiveFiles@2
-    #   displayName: 'Archive FakeRestAPI'
-    #   inputs:
-    #     rootFolderOrFile: './fakerestapi/'
-    #     includeRootFolder: false
-    #     archiveType: 'zip'
-    #     archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip'
+    - task: ArchiveFiles@2
+      displayName: 'Archive FakeRestAPI'
+      inputs:
+        rootFolderOrFile: './fakerestapi/'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip'
 
-    # - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
-    #   displayName: 'Upload FakeRestAPI Package'
-    #   artifact: drop-fakerestapi
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
+      displayName: 'Upload FakeRestAPI Package'
+      artifact: drop-fakerestapi
 
-    # # Selenium build
+    # Selenium build
 
     - task: ArchiveFiles@2
       displayName: 'Archive Selenium VM files'
@@ -88,21 +88,21 @@ stages:
 - stage: Deploy
   jobs:
 
-  # - deployment: FakeRestAPI
-  #   pool:
-  #     vmImage: 'ubuntu-latest'
-  #   environment: 'TEST'
-  #   strategy:
-  #     runOnce:
-  #       deploy:
-  #         steps:
-  #         - task: AzureWebApp@1
-  #           displayName: 'Deploy Azure Web App'
-  #           inputs:
-  #             azureSubscription: 'UdacityDevopsProject3-sc'
-  #             appName: 'UdacityDevopsProject3-AppService'
-  #             appType: webApp
-  #             package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
+  - deployment: FakeRestAPI
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'TEST'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            displayName: 'Deploy Azure Web App'
+            inputs:
+              azureSubscription: 'UdacityDevopsProject3-sc'
+              appName: 'UdacityDevopsProject3-AppService'
+              appType: webApp
+              package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
 
   - deployment: VMDeploy
     displayName: VMDeploy
@@ -138,25 +138,20 @@ stages:
               script: |
                 unzip -o $(Pipeline.Workspace)/drop-selenium/$(ls $(Pipeline.Workspace)/drop-selenium/ | tail -n1) -d /home/adminuser
 
-          # - bash: |
-          #     export SELENIUM_HEADLESS=TRUE
-          #     python3 /home/adminuser/login.py > /home/adminuser/selenium-results.txt
-          #   displayName: 'Run UI tests'
 
-
-# - stage: IntegrationTests
-#   jobs:
-#   - job: IntegrationTests
-#     pool:
-#       vmImage: 'ubuntu-latest'
-#     steps:
-#     - bash: |
-#         make newman
-#       displayName: 'Run Postman tests'
-#     - task: PublishTestResults@2
-#       inputs:
-#         testResultsFormat: 'JUnit' # Options: JUnit, NUnit, VSTest, xUnit, cTest
-#         testResultsFiles: 'results/newman-output.xml'
+- stage: IntegrationTests
+  jobs:
+  - job: IntegrationTests
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - bash: |
+        make newman
+      displayName: 'Run Postman tests'
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit' # Options: JUnit, NUnit, VSTest, xUnit, cTest
+        testResultsFiles: 'results/newman-output.xml'
 
 
 - stage: UITests
@@ -171,6 +166,7 @@ stages:
         deploy:
           steps:
           - task: Bash@3
+            displayName: Run UI Tests
             inputs:
               targetType: 'inline'
               script: |
