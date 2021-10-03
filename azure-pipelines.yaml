@@ -43,6 +43,7 @@ stages:
         ARM_CLIENT_SECRET:   $(ARM_CLIENT_SECRET)
         ARM_TENANT_ID:       $(ARM_TENANT_ID)
         ARM_ACCESS_KEY:      $(ARM_ACCESS_KEY) # Needed for state sync
+        TF_VAR_ssh_public_key_path: "/home/vsts/work/_temp/udacity_proj3_vm.pub"
 
     - bash: |
         cd ./terraform
