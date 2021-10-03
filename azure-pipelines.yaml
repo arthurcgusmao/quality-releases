@@ -9,7 +9,7 @@ stages:
   jobs:
   - job: Build
     pool:
-      name: Hosted Ubuntu 1604
+      vmImage: 'ubuntu-latest'
     steps:
 
     # Download SSH key for VM infra deploy
@@ -59,21 +59,37 @@ stages:
     - task: ArchiveFiles@2
       displayName: 'Archive FakeRestAPI'
       inputs:
-        rootFolderOrFile: './automatedtesting/jmeter/fakerestapi/'
+        rootFolderOrFile: './fakerestapi/'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip'
 
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
-      displayName: 'Upload Package'
+      displayName: 'Upload FakeRestAPI Package'
       artifact: drop-fakerestapi
+
+    # Selenium build
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive Selenium VM files'
+      inputs:
+        rootFolderOrFile: './automatedtesting/selenium'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-selenium.zip'
+
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-selenium.zip
+      displayName: 'Upload Selenium Tests'
+      artifact: drop-selenium
+
+    # JMeter build
 
 
 - stage: Deploy
   jobs:
   - deployment: FakeRestAPI
     pool:
-      vmImage: 'Ubuntu-16.04'
+      vmImage: 'ubuntu-latest'
     environment: 'TEST'
     strategy:
       runOnce:
@@ -87,11 +103,46 @@ stages:
               appType: webApp
               package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
 
+  - deployment: VMDeploy
+    displayName: VMDeploy
+    environment:
+      name: VM-UI-TESTS
+      resourceType: VirtualMachine
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                #! /bin/bash
+                sudo apt-get upgrade -y
+                sudo apt-get install -y python3-pip unzip chromium-browser
+                LC_ALL=C pip3 install selenium
+                if [ ! -f "$HOME/bin/chromedriver" ] ; then
+                    wget https://chromedriver.storage.googleapis.com/90.0.4430.24/chromedriver_linux64.zip
+                    unzip chromedriver_linux64.zip
+                    mv chromedrive $HOME/bin/chromedriver
+                fi
+
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              artifactName: drop-selenium
+              downloadPath: ~/selenium.zip
+
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                unzip selenium.zip
+
+
 - stage: IntegrationTests
   jobs:
   - job: IntegrationTests
     pool:
-      name: Hosted Ubuntu 1604
+      vmImage: 'ubuntu-latest'
     steps:
     - bash: |
         make newman
@@ -103,25 +154,17 @@ stages:
 
 
 
-  # - deployment: VMDeploy
-  #   displayName: NAME
-  #   environment:
-  #     name:  ENVIRONMENT NAME
-  #     resourceType: VirtualMachine
-  #     tags: TAG NAME
-  #   strategy:
-  #     runOnce:
-  #       deploy:
-  #         steps:
-  #         - task: Bash@3
-  #           inputs:
-  #             targetType: 'inline'
-  #             script: |
-  #               #! /bin/bash
-
-  #               sudo apt-get upgrade -y
-  #               sudo apt-get install python3-pip -y
-  #               sudo apt-get install unzip -y
-  #               sudo apt-get install -y chromium-browser
-  #               pip3 install selenium
-  #               export PATH=$PATH:some/path
+- stage: UITests
+  jobs:
+  - job: UITests
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - bash: |
+        export SELENIUM_HEADLESS=TRUE
+        python3 login.py > results/selenium.txt
+      displayName: 'Run UI tests'
+    # - task: PublishTestResults@2
+    #   inputs:
+    #     testResultsFormat: 'JUnit' # Options: JUnit, NUnit, VSTest, xUnit, cTest
+    #     testResultsFiles: 'results/newman-output.xml'
