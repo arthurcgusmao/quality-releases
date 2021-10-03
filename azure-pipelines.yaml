@@ -36,10 +36,16 @@ stages:
         cd ./terraform
         terraform init
         terraform apply -auto-approve
-        cd ..
+      displayName: Terraform Init and Apply
+      env:
+        ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+        ARM_CLIENT_ID:       $(ARM_CLIENT_ID)
+        ARM_CLIENT_SECRET:   $(ARM_CLIENT_SECRET)
+        ARM_TENANT_ID:       $(ARM_TENANT_ID)
 
     - bash: |
-        echo terraform output -json | jq ".ip_address.value"
+        cd ./terraform
+        terraform output -json | jq ".ip_address.value" | tee echo
       name: VMIPAddress
 
     - task: ArchiveFiles@2
