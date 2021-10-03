@@ -10,7 +10,11 @@ variable "resource_group" {}
 variable "application_type" {}
 
 # Network
-variable virtual_network_name {}
-variable address_prefix_test {}
-variable address_space {}
+variable "virtual_network_name" {}
+variable "address_prefix_test" {}
+variable "address_space" {}
 
+# Virtual Machine
+variable "ssh_public_key_path" {
+  default = "~/.ssh/id_rsa.pub"
+}

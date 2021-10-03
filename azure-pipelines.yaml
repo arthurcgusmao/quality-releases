@@ -9,11 +9,14 @@ stages:
       name: Hosted Ubuntu 1604
     steps:
     # Needed for Terraform VM deployment
-    # - task: InstallSSHKey@0
-    #   inputs:
-    #     knownHostsEntry: 'KNOWN_HOSTS_STRING'
-    #     sshPublicKey: 'PUBLIC_KEY'
-    #     sshKeySecureFile: 'id_rsa'
+    - task: InstallSSHKey@0
+      inputs:
+        knownHostsEntry: ''
+        sshPublicKey: '$(VMSSHPublicKey)'
+        sshKeySecureFile: 'udacity_proj3_vm'
+    - bash: |
+        echo "StrictHostKeyChecking no" >> ~/.ssh/config
+      displayName: "Configure SSH settings"
     - task: ArchiveFiles@2
       displayName: 'Archive FakeRestAPI'
       inputs:
@@ -56,12 +59,10 @@ stages:
   #             targetType: 'inline'
   #             script: |
   #               #! /bin/bash
-                
+
   #               sudo apt-get upgrade -y
   #               sudo apt-get install python3-pip -y
   #               sudo apt-get install unzip -y
   #               sudo apt-get install -y chromium-browser
   #               pip3 install selenium
   #               export PATH=$PATH:some/path
-
-
