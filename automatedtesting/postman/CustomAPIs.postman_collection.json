@@ -1,0 +1,162 @@
+{
+	"info": {
+		"_postman_id": "08e505cc-2186-4158-8e5d-7ba6ced01386",
+		"name": "Custom APIs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful response\", function () {",
+							"    pm.expect(pm.response.status).to.equal('OK');",
+							"});",
+							"pm.test(\"Successful response body\", function () {",
+							"    pm.expect(pm.response.json().Title).to.equal(\"Udacity Book\")",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"ID\": 9,\n  \"Title\": \"Udacity Book\",\n  \"Description\": \"Test book for testing\",\n  \"PageCount\": 99,\n  \"Excerpt\": \"Udacity rocks\",\n  \"PublishDate\": \"2021-10-03T14:36:40.0565799+00:00\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/Books",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"Books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read Book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful response\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Book 9\");",
+							"});",
+							"var json = pm.response.json();",
+							"pm.environment.set(\"book_id\", json.ID);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/Books/9",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"Books",
+						"9"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful response\", function () {",
+							"    pm.expect(pm.response.status).to.equal('OK');",
+							"});",
+							"pm.test(\"Successful response body\", function () {",
+							"    pm.expect(pm.response.json().Excerpt).to.equal(\"Udacity is awesome!!!\")",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"ID\": 9,\n  \"Title\": \"Udacity Book\",\n  \"Description\": \"Test book for testing\",\n  \"PageCount\": 99,\n  \"Excerpt\": \"Udacity is awesome!!!\",\n  \"PublishDate\": \"2021-10-03T14:36:40.0565799+00:00\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/Books/9",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"Books",
+						"9"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful response\", function () {",
+							"    pm.expect(pm.response.status).to.equal('OK');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/Books/9",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"Books",
+						"9"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

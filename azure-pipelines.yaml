@@ -87,6 +87,22 @@ stages:
               appType: webApp
               package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
 
+- stage: IntegrationTests
+  jobs:
+  - job: IntegrationTests
+    pool:
+      name: Hosted Ubuntu 1604
+    steps:
+    - bash: |
+        make newman
+      displayName: 'Run Postman tests'
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit' # Options: JUnit, NUnit, VSTest, xUnit, cTest
+        testResultsFiles: 'results/newman-output.xml'
+
+
+
   # - deployment: VMDeploy
   #   displayName: NAME
   #   environment:
