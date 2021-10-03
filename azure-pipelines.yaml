@@ -11,17 +11,16 @@ stages:
     pool:
       name: Hosted Ubuntu 1604
     steps:
-    # Needed for Terraform VM deployment
+
+    # Download SSH key for VM infra deploy
+
     - task: InstallSSHKey@0
       inputs:
         knownHostsEntry: 'ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKKu3ifmhAlFWRewCWho8ZPyJJkKlRFI46gzGbqKPYiP7NdiBzm46AbDVIhUfCMn02DHhpMVPJ+ahVufBsbyQSk='
         sshPublicKey: '$(VMSSHPublicKey)'
         sshKeySecureFile: 'udacity_proj3_vm'
 
-    # # Prevent SSH from checking unknown hosts
-    # - bash: |
-    #     echo "StrictHostKeyChecking no" >> ~/.ssh/config
-    #   displayName: "SSH: Disable unknown hosts check"
+    # Deploy infra w/ Terraform
 
     - task: DownloadSecureFile@1
       name: tfvarsTask
@@ -31,7 +30,6 @@ stages:
     - bash: |
         mv $(tfvarsTask.secureFilePath) ./terraform/terraform.tfvars
 
-    # Deploy infra w/ Terraform
     - bash: |
         cd ./terraform
         terraform init
@@ -49,11 +47,19 @@ stages:
         cd ./terraform
         terraform output -json | jq ".ip_address.value" | tee echo
       name: VMIPAddress
+      env:
+        ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+        ARM_CLIENT_ID:       $(ARM_CLIENT_ID)
+        ARM_CLIENT_SECRET:   $(ARM_CLIENT_SECRET)
+        ARM_TENANT_ID:       $(ARM_TENANT_ID)
+        ARM_ACCESS_KEY:      $(ARM_ACCESS_KEY) # Needed for state sync
+
+    # FakeRestAPI build
 
     - task: ArchiveFiles@2
       displayName: 'Archive FakeRestAPI'
       inputs:
-        rootFolderOrFile: 'path/to/fakerestapi'
+        rootFolderOrFile: './automatedtesting/jmeter/fakerestapi/'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip'
@@ -63,7 +69,7 @@ stages:
       artifact: drop-fakerestapi
 
 
-- stage:
+- stage: Deploy
   jobs:
   - deployment: FakeRestAPI
     pool:
@@ -76,10 +82,11 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Deploy Azure Web App'
             inputs:
-              azureSubscription: ''
-              appName: ''
+              azureSubscription: 'UdacityDevopsProject3-sc'
+              appName: 'UdacityDevopsProject3-AppService'
               appType: webApp
               package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
+
   # - deployment: VMDeploy
   #   displayName: NAME
   #   environment:
