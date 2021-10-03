@@ -1,7 +1,10 @@
 name: Azure Pipelines
+
 variables:
   python.version: '3.7.6'
+
 stages:
+
 - stage: Build
   jobs:
   - job: Build
@@ -11,12 +14,34 @@ stages:
     # Needed for Terraform VM deployment
     - task: InstallSSHKey@0
       inputs:
-        knownHostsEntry: ''
+        knownHostsEntry: 'ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKKu3ifmhAlFWRewCWho8ZPyJJkKlRFI46gzGbqKPYiP7NdiBzm46AbDVIhUfCMn02DHhpMVPJ+ahVufBsbyQSk='
         sshPublicKey: '$(VMSSHPublicKey)'
         sshKeySecureFile: 'udacity_proj3_vm'
+
+    # # Prevent SSH from checking unknown hosts
+    # - bash: |
+    #     echo "StrictHostKeyChecking no" >> ~/.ssh/config
+    #   displayName: "SSH: Disable unknown hosts check"
+
+    - task: DownloadSecureFile@1
+      name: tfvarsTask
+      displayName: 'Download .tfvars file'
+      inputs:
+        secureFile: 'terraform.tfvars'
     - bash: |
-        echo "StrictHostKeyChecking no" >> ~/.ssh/config
-      displayName: "Configure SSH settings"
+        mv $(tfvarsTask.secureFilePath) ./terraform/terraform.tfvars
+
+    # Deploy infra w/ Terraform
+    - bash: |
+        cd ./terraform
+        terraform init
+        terraform apply -auto-approve
+        cd ..
+
+    - bash: |
+        echo terraform output -json | jq ".ip_address.value"
+      name: VMIPAddress
+
     - task: ArchiveFiles@2
       displayName: 'Archive FakeRestAPI'
       inputs:
@@ -24,9 +49,12 @@ stages:
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip'
+
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
       displayName: 'Upload Package'
       artifact: drop-fakerestapi
+
+
 - stage:
   jobs:
   - deployment: FakeRestAPI
