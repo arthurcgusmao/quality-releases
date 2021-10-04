@@ -173,9 +173,9 @@ stages:
                 export SELENIUM_HEADLESS=TRUE
                 python3 /home/adminuser/login.py > /home/adminuser/selenium-results.txt
 
-- stage: LoadTest
+- stage: LoadTests
   jobs:
-  - job: LoadTest
+  - job: LoadTests
     pool:
       vmImage: 'ubuntu-latest'
     steps:
