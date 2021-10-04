@@ -1,12 +1,12 @@
 {
 	"info": {
-		"_postman_id": "08e505cc-2186-4158-8e5d-7ba6ced01386",
+		"_postman_id": "2983be20-fcf3-4c8c-927e-ca43d09f4ea6",
 		"name": "Custom APIs",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Create Book",
+			"name": "Create",
 			"event": [
 				{
 					"listen": "test",
@@ -15,9 +15,61 @@
 							"pm.test(\"Successful response\", function () {",
 							"    pm.expect(pm.response.status).to.equal('OK');",
 							"});",
-							"pm.test(\"Successful response body\", function () {",
-							"    pm.expect(pm.response.json().Title).to.equal(\"Udacity Book\")",
-							"})"
+							"pm.test(\"Valid data\", function () {",
+							"    pm.expect(pm.response.json().ID).to.equal(parseInt(pm.environment.get(\"page\")));",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var env = pm.environment.get(\"endpoint\");",
+							"var id = parseInt(pm.environment.get(\"page\"));",
+							"var dynamicRequestBody;",
+							"",
+							"if (env === \"Books\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"Title\": \"Udacity Book\",",
+							"        \"Description\": \"Test book for testing\",",
+							"        \"PageCount\": 99,",
+							"        \"Excerpt\": \"Udacity rocks\",",
+							"        \"PublishDate\": \"2021-10-03T14:36:40.0565799+00:00\"",
+							"    };",
+							"} else if (env === \"Authors\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"IDBook\": 2,",
+							"        \"FirstName\": \"sample string 3\",",
+							"        \"LastName\": \"sample string 4\"",
+							"    };",
+							"} else if (env === \"CoverPhotos\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"IDBook\": 1,",
+							"        \"Url\": \"https://placeholdit.imgix.net/~text?txtsize=33&txt=Book 1&w=250&h=350\"",
+							"    };",
+							"} else if (env === \"Users\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"UserName\": \"User 99\",",
+							"        \"Password\": \"PasswordX\"",
+							"    };",
+							"} else if (env === \"Activities\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"Title\": \"Activity X\",",
+							"        \"DueDate\": \"2021-05-04T20:13:44.3149189+00:00\",",
+							"        \"Completed\": false",
+							"    }",
+							"}",
+							"",
+							"pm.environment.set(\"dynamicRequestBody\", JSON.stringify(dynamicRequestBody));",
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -28,7 +80,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"ID\": 9,\n  \"Title\": \"Udacity Book\",\n  \"Description\": \"Test book for testing\",\n  \"PageCount\": 99,\n  \"Excerpt\": \"Udacity rocks\",\n  \"PublishDate\": \"2021-10-03T14:36:40.0565799+00:00\"\n}",
+					"raw": "{{dynamicRequestBody}}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -36,30 +88,32 @@
 					}
 				},
 				"url": {
-					"raw": "{{url}}/api/Books",
+					"raw": "{{url}}/api/{{endpoint}}",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"api",
-						"Books"
+						"{{endpoint}}"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Read Book",
+			"name": "Read",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
 							"pm.test(\"Successful response\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Book 9\");",
+							"    pm.expect(pm.response.status).to.equal('OK');",
 							"});",
-							"var json = pm.response.json();",
-							"pm.environment.set(\"book_id\", json.ID);"
+							"pm.test(\"Valid data\", function () {",
+							"    pm.expect(pm.response.json().ID).to.equal(parseInt(pm.environment.get(\"page\")));",
+							"});",
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -69,21 +123,21 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/api/Books/9",
+					"raw": "{{url}}/api/{{endpoint}}/{{page}}",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"api",
-						"Books",
-						"9"
+						"{{endpoint}}",
+						"{{page}}"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Update Book",
+			"name": "Update",
 			"event": [
 				{
 					"listen": "test",
@@ -92,9 +146,61 @@
 							"pm.test(\"Successful response\", function () {",
 							"    pm.expect(pm.response.status).to.equal('OK');",
 							"});",
-							"pm.test(\"Successful response body\", function () {",
-							"    pm.expect(pm.response.json().Excerpt).to.equal(\"Udacity is awesome!!!\")",
-							"})"
+							"pm.test(\"Valid data\", function () {",
+							"    pm.expect(pm.response.json().ID).to.equal(parseInt(pm.environment.get(\"page\")));",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var env = pm.environment.get(\"endpoint\");",
+							"var id = parseInt(pm.environment.get(\"page\"));",
+							"var dynamicRequestBody;",
+							"",
+							"if (env === \"Books\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"Title\": \"Udacity Book\",",
+							"        \"Description\": \"Test book for testing\",",
+							"        \"PageCount\": 99,",
+							"        \"Excerpt\": \"Udacity rocks\",",
+							"        \"PublishDate\": \"2021-10-03T14:36:40.0565799+00:00\"",
+							"    };",
+							"} else if (env === \"Authors\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"IDBook\": 2,",
+							"        \"FirstName\": \"sample string 3\",",
+							"        \"LastName\": \"sample string 4\"",
+							"    };",
+							"} else if (env === \"CoverPhotos\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"IDBook\": 1,",
+							"        \"Url\": \"https://placeholdit.imgix.net/~text?txtsize=33&txt=Book 1&w=250&h=350\"",
+							"    };",
+							"} else if (env === \"Users\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"UserName\": \"User 99\",",
+							"        \"Password\": \"PasswordX\"",
+							"    };",
+							"} else if (env === \"Activities\") {",
+							"    dynamicRequestBody = {",
+							"        \"ID\": id,",
+							"        \"Title\": \"Activity X\",",
+							"        \"DueDate\": \"2021-05-04T20:13:44.3149189+00:00\",",
+							"        \"Completed\": false",
+							"    }",
+							"}",
+							"",
+							"pm.environment.set(\"dynamicRequestBody\", JSON.stringify(dynamicRequestBody));",
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -105,7 +211,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"ID\": 9,\n  \"Title\": \"Udacity Book\",\n  \"Description\": \"Test book for testing\",\n  \"PageCount\": 99,\n  \"Excerpt\": \"Udacity is awesome!!!\",\n  \"PublishDate\": \"2021-10-03T14:36:40.0565799+00:00\"\n}",
+					"raw": "{{dynamicRequestBody}}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -113,21 +219,21 @@
 					}
 				},
 				"url": {
-					"raw": "{{url}}/api/Books/9",
+					"raw": "{{url}}/api/{{endpoint}}/{{page}}",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"api",
-						"Books",
-						"9"
+						"{{endpoint}}",
+						"{{page}}"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Delete Book",
+			"name": "Delete",
 			"event": [
 				{
 					"listen": "test",
@@ -145,14 +251,14 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/api/Books/9",
+					"raw": "{{url}}/api/{{endpoint}}/{{page}}",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"api",
-						"Books",
-						"9"
+						"{{endpoint}}",
+						"{{page}}"
 					]
 				}
 			},
