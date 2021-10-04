@@ -182,13 +182,16 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - bash: |
-        sudo apt-get install -y jmeter
+        wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.4.1.tgz
+        tar xvf apache-jmeter-5.4.1.tgz
       displayName: 'Install jmeter'
 
     - bash: |
+        export PATH=$(pwd)/apache-jmeter-5.4.1/bin:$PATH
         jmeter -n -t automatedtesting/jmeter/Stress.jmx -l /var/log/stress-results.jtl
       displayName: 'Run stress load test'
 
     - bash: |
+        export PATH=$(pwd)/apache-jmeter-5.4.1/bin:$PATH
         jmeter -n -t automatedtesting/jmeter/Endurance.jmx -l /var/log/endurance-results.jtl
       displayName: 'Run endurance load test'
