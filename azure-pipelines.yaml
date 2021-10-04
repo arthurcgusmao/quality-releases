@@ -173,7 +173,7 @@ stages:
                 export SELENIUM_HEADLESS=TRUE
                 python3 /home/adminuser/login.py
                 cp selenium-results.txt /home/adminuser/selenium-results.txt
-                cp selenium-results.txt /var/log/selenium-results.txt
+                sudo cp selenium-results.txt /var/log/selenium-results.txt
 
 - stage: LoadTests
   jobs:

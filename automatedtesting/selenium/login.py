@@ -44,7 +44,7 @@ def login (user, password):
     driver.find_element_by_css_selector("input[id='login-button']").click()
 
     assert driver.current_url == "https://www.saucedemo.com/inventory.html"
-    logger.info(f"Login successful with user {user}")
+    logger.info("Login successful with user %s" % user)
 
     return driver
 
@@ -64,7 +64,7 @@ def add_products_to_cart(driver):
     logger.info("Adding products to cart...")
     for item in items_list:
         item.find_element_by_tag_name("button").click()
-        logger.info(f"Added product {get_item_name(item)} to cart.")
+        logger.info("Added product %s to cart." % get_item_name(item))
     logger.info("Finished adding products to cart.")
 
 
@@ -80,7 +80,7 @@ def remove_products_from_cart(driver):
     logger.info("Removing products from cart...")
     for item in items_list:
         item.find_element_by_tag_name("button").click()
-        logger.info(f"Removed product {get_item_name(item)} from cart.")
+        logger.info("Removed product %s from cart." % get_item_name(item))
     logger.info("Finished removing products from cart.")
 
 
