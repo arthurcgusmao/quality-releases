@@ -58,7 +58,7 @@ Our integration tests consisted of performing both data validation and regressio
 
 ![](./screenshots/postman-run-summaries-page.png)
 
-![](./screenshots/postman-charts.png)
+![](./screenshots/postman-test-results-page.png)
 
 ![](./screenshots/postman-publish-tests-results.png)
 
