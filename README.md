@@ -45,7 +45,11 @@ A [load test suite](./automatedtesting/jmeter/) was created with JMeter to test 
 
 The UI tests were automated via the Selenium set of tools, using the Python Selenium package and ChromeDriver. The file that contains the script for our tests can be found [here](./automatedtesting/selenium/login.py). A screenshot of the execution of the tests in the pipeline is presented below.
 
-![](./screenshots/selenium-execution-ci.png)
+![](./screenshots/selenium-execution-ci-1.png)
+
+![](./screenshots/selenium-execution-ci-2.png)
+
+![](./screenshots/selenium-execution-ci-3.png)
 
 
 ### Integration tests
