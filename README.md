@@ -74,6 +74,10 @@ In addition to automated testing and infrastructure creation, we also configured
 
 ### Azure Log Analytics
 
-The output of the UI tests are collected by Azure Log Analytics. Below there is a screenshot of a query with its results set, including timestamps, of the output of the execution of the Selenium automated tests.
+The output of the UI tests are collected by Azure Log Analytics. Below there is a screenshot of a query with its results set, including timestamps, of the output of the execution of the Selenium automated tests. One can see which user was logged in and which products were added and removed from the cart.
 
-![](./screenshots/)
+![](./screenshots/log-analytics-user-login.png)
+
+![](./screenshots/log-analytics-products-added.png)
+
+![](./screenshots/log-analytics-products-removed.png)
