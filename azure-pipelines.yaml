@@ -171,7 +171,7 @@ stages:
               script: |
                 #! /bin/bash
                 export SELENIUM_HEADLESS=TRUE
-                python3 /home/adminuser/login.py > /home/adminuser/selenium-results.txt
+                python3 /home/adminuser/login.py
 
 - stage: LoadTests
   jobs:
